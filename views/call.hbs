@@ -1,0 +1,37 @@
+<table>
+    <thead>
+        <tr class="table100-head">
+            <th class="column1">name</th>
+            <th class="column2">phoneNo</th>
+            <th class="column3">duration</th>
+
+        </tr>
+    </thead>
+    <tbody id="dev">
+    </tbody>
+</table>
+<script>
+    function get(name, url = window.location.href) {
+        name = name.replace(/[\[\]]/g, '\\$&');
+        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+    var io = io();
+    io.emit('call', get('id'))
+    io.on('call', (c) => {
+        console.log(c)
+                document.getElementById("dev").innerHTM = ''
+        c.forEach((z) => {
+            document.getElementById("dev").innerHTML += `
+                <tr>
+                    <td class="column1">${z.name}</td>
+                    <td class="column2">${z.phoneNo}</td>
+                    <td class="column3">${z.duration}</td>
+                </tr>
+            `;
+        });
+    })
+</script>

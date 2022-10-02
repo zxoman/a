@@ -1,0 +1,57 @@
+<style>
+    .file {
+        width: 100px;
+        display: inline-block;
+    }
+
+    .text {
+        color: #fff;
+    }
+</style>
+<div id="files">
+    <div class="file">
+        <img src="/folder.png" width="100px">
+        <p class="text">dfsdffcgbg</p>
+    </div>
+    <div class="file">
+        <img src="/file.png" width="100px">
+        <p class="text">dfsdffcgbg</p>
+    </div>
+</div>
+<script>
+    function get(name, url = window.location.href) {
+        name = name.replace(/[\[\]]/g, '\\$&');
+        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+    var path = '/storage/emulated/0/';
+    var io = io();
+    go = (path)=>{
+        io.emit('files', { id: get('id'), path: path });
+    }
+    go(path)
+    io.on('files', (s) => {
+        console.log(s)
+        document.getElementById("files").innerHTML = ""
+        s.forEach((z) => {
+            if (z.isDir) {
+                document.getElementById("files").innerHTML +=
+                `   <div class="file" >
+                        <img src="/folder.png" width="100px" onclick="go('${z.path}')">
+                        <p class="text">${z.name}</p>
+                    </div>`
+            } else {
+                document.getElementById("files").innerHTML += `
+                <div class="file">
+                    <img src="/file.png" width="100px">
+                    <p class="text">${z.name}</p>
+                </div>
+            `;
+            }
+        });
+
+    })
+</script>

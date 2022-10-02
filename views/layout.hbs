@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>{{title}}</title>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+  <link rel="stylesheet" type="text/css" href="/table/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="/table/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css" href="/table/animate.css">
+  <link rel="stylesheet" type="text/css" href="/table/select2.min.css">
+  <link rel="stylesheet" type="text/css" href="/table/perfect-scrollbar.css">
+  <link rel="stylesheet" type="text/css" href="/table/util.css">
+  <link rel="stylesheet" type="text/css" href="/table/main.css">
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+  <div class="con">
+    <a href="/"><button class="button">victems</button></a>
+    <a href="/call" id="calll"><button class="button">call</button></a>
+    <a href="/sms" id="smss"><button class="button">sms</button></a>
+    <a href="/cam" id="camm"><button class="button">cam</button></a>
+    <a href="/mic" id="micc"><button class="button">mic</button></a>
+    <a href="/files" id="filess"><button class="button">files</button></a>
+  </div>
+  {{{body}}}
+</body>
+<script type="text/javascript" async="" src="/table/analytics.js.download"></script>
+<script src="/table/jquery-3.2.1.min.js.download"></script>
+<script src="/table/popper.js.download"></script>
+<script src="/table/bootstrap.min.js.download"></script>
+<script src="/table/select2.min.js.download"></script>
+<script src="/table/main.js.download"></script>
+<script>
+  function get(name, url = window.location.href) {
+    name = name.replace(/[\[\]]/g, '\\$&');
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+      results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+  }
+  document.getElementById('calll').href += "?id=" + get('id')
+  document.getElementById('filess').href += "?id=" + get('id')
+
+  document.getElementById('smss').href += "?id=" + get('id')
+
+  document.getElementById('micc').href += "?id=" + get('id')
+
+  document.getElementById('camm').href += "?id=" + get('id')
+
+</script>
+
+</html>

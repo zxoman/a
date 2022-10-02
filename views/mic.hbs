@@ -1,0 +1,22 @@
+<input type="text" id="time">
+<button onclick="shot()">shot</button>
+<audio id="m" controls></audio>
+<script>
+    function get(name, url = window.location.href) {
+        name = name.replace(/[\[\]]/g, '\\$&');
+        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+    io = io()
+    io.on('mic', () => {
+        document.getElementById('m').src = "/test.mp3?"+ new Date().getTime();
+    })
+
+    var shot = () => {
+        io.emit("mic",{id:get('id'),time:document.getElementById('time').value})
+    }
+
+</script>

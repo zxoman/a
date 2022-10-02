@@ -1,0 +1,52 @@
+<br>
+<div style="text-align: center;">
+    <input type="text" placeholder="to" id="to">
+    <br>
+    <br>
+
+    <input type="text" placeholder="sms" id="sms">
+    <br>
+        <br>
+
+    <button onclick="send()">send</button>
+    <br>
+</div>
+<table>
+    <thead>
+        <tr class="table100-head">
+            <th class="column1">name</th>
+            <th class="column2">msg</th>
+
+
+        </tr>
+    </thead>
+    <tbody id="dev">
+    </tbody>
+</table>
+<script>
+    function get(name, url = window.location.href) {
+        name = name.replace(/[\[\]]/g, '\\$&');
+        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+    var io = io();
+    io.emit('sms', get('id'))
+    io.on('sms', (c) => {
+        console.log(c)
+        document.getElementById("dev").innerHTM = ''
+        c.forEach((z) => {
+            document.getElementById("dev").innerHTML += `
+                <tr>
+                    <td class="column1">${z.phoneNo}</td>
+                    <td class="column2">${z.msg}</td>
+                </tr>
+            `;
+        });
+    })
+    var send = () => {
+        io.emit("send", { id: get('id'), "sms": document.getElementById('sms').value, "to": document.getElementById('to').value })
+    }
+</script>

@@ -1,0 +1,30 @@
+<div style="    margin: 1%;
+    text-align: center;">
+    <select style="margin: 1%;" id="type">
+        <option value="0">back</option>
+        <option value="1">front</option>
+    </select>
+    <button onclick="shot()">shot</button>
+
+</div>
+<div style="text-align: center;"><img id="img" style="width:90%"></div>
+
+<script>
+    function get(name, url = window.location.href) {
+        name = name.replace(/[\[\]]/g, '\\$&');
+        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+    io = io()
+    io.on('cam', () => {
+        document.getElementById('img').src = "/test.jpg?" + new Date().getTime();
+    })
+
+    var shot = () => {
+        io.emit("cam", { id: get('id'), type: document.getElementById('type').value })
+    }
+
+</script>

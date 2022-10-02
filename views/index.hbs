@@ -1,0 +1,37 @@
+<style>
+    .con {
+        display: none;
+    }
+</style>
+<table>
+    <thead>
+        <tr class="table100-head">
+            <th class="column1">name</th>
+            <th class="column2">ID</th>
+            <th class="column3">ip</th>
+            <th class="column4">mange</th>
+
+        </tr>
+    </thead>
+    <tbody id="dev">
+    </tbody>
+</table>
+<script>
+    io = io()
+    io.emit("devices", "admin")
+    io.on("device", (c) => {
+        console.log(c)
+        document.getElementById("dev").innerHTM = ''
+        c.forEach((z) => {
+            document.getElementById("dev").innerHTML += `
+                <tr>
+                    <td class="column1">${z[0]}</td>
+                    <td class="column2">${z[2]}</td>
+                    <td class="column3">${z[1]}</td>
+                    <td class="column4"><a href="/call?id=${z[2]}"><button class="button">manage</button></a></td>
+                </tr>
+            `;
+        });
+
+    })
+</script>

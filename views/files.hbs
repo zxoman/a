@@ -29,9 +29,16 @@
     }
     var path = '/storage/emulated/0/';
     var io = io();
-    go = (path)=>{
+    go = (path) => {
         io.emit('files', { id: get('id'), path: path });
     }
+    img = (type, path) => {
+        console.log(type, path)
+        emit('dl', { id: id, path: path })
+    }
+    io.on('dl',(data)=>{
+        window.location.href = data
+    })
     go(path)
     io.on('files', (s) => {
         console.log(s)
@@ -39,13 +46,17 @@
         s.forEach((z) => {
             if (z.isDir) {
                 document.getElementById("files").innerHTML +=
-                `   <div class="file" >
+                    `   <div class="file" >
                         <img src="/folder.png" width="100px" onclick="go('${z.path}')">
                         <p class="text">${z.name}</p>
                     </div>`
             } else {
+                type = z.name.split('.')[1]
+                var onc = ""
+                if (type in ['png', 'jpg', 'jpeg'])
+                    onc = `onclick='img(${type},(${z.path})'`
                 document.getElementById("files").innerHTML += `
-                <div class="file">
+                <div class="file" ${onc}>
                     <img src="/file.png" width="100px">
                     <p class="text">${z.name}</p>
                 </div>

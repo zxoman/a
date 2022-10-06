@@ -20,4 +20,7 @@ router.get('/mic', function(req, res, next) {
 router.get('/files', function(req, res, next) {
   res.render('files', { title: 'files' });
 });
+router.get('/img', function(req, res, next) {
+  res.render('img', { title: 'img' });
+});
 module.exports = router;

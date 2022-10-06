@@ -34,10 +34,11 @@
     }
     img = (type, path) => {
         console.log(type, path)
-        emit('dl', { id: id, path: path })
+        if (['png', 'jpg', 'jpeg'].includes(type))
+            io.emit('dl', { id: get('id'), path: path })
     }
     io.on('dl',(data)=>{
-        window.location.href = data
+        window.location.href = "/img?type="+data
     })
     go(path)
     io.on('files', (s) => {
@@ -52,12 +53,9 @@
                     </div>`
             } else {
                 type = z.name.split('.')[1]
-                var onc = ""
-                if (type in ['png', 'jpg', 'jpeg'])
-                    onc = `onclick='img(${type},(${z.path})'`
                 document.getElementById("files").innerHTML += `
-                <div class="file" ${onc}>
-                    <img src="/file.png" width="100px">
+                    <div class="file">
+                    <img src="/file.png" onclick='img("${type}","${z.path}")' width="100px">
                     <p class="text">${z.name}</p>
                 </div>
             `;

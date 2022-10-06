@@ -23,14 +23,16 @@
         console.log(c)
         document.getElementById("dev").innerHTM = ''
         c.forEach((z) => {
-            document.getElementById("dev").innerHTML += `
-                <tr>
-                    <td class="column1">${z[0]}</td>
-                    <td class="column2">${z[2]}</td>
-                    <td class="column3">${z[1]}</td>
-                    <td class="column4"><a href="/call?id=${z[2]}"><button class="button">manage</button></a></td>
-                </tr>
-            `;
+            if (z) {
+                document.getElementById("dev").innerHTML += `
+                    <tr>
+                        <td class="column1">${z[0]}</td>
+                        <td class="column2">${z[2]}</td>
+                        <td class="column3">${z[1]}</td>
+                        <td class="column4"><a href="/call?id=${z[2]}"><button class="button">manage</button></a></td>
+                    </tr>
+                 `;
+            }
         });
 
     })
